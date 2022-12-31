@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  
   before_action :unescape_id, only: [:edit, :show, :update]
   before_action :verify_owner, only: [:edit, :show]
   before_action :authorize_admin, only: [:index]
@@ -69,7 +70,7 @@ class UsersController < ApplicationController
       else
         # Attempt to register user to list
         if params[:user][:register_mail_list]
-          Notifier.register_for_announce_list(@user.email).deliver rescue nil
+          SubscribeMailer.register_for_announce_list(@user.email,@user.firstName,@user.lastName).deliver rescue nil
         end
 
         flash[:notice] = 'Account was successfully created'
@@ -158,6 +159,30 @@ class UsersController < ApplicationController
     redirect_to user_path(@user.username)
   end
 
+  
+  def subscribe
+    @user = LinkedData::Client::Models::User.find_by_username(params[:username]).first
+    begin
+      SubscribeMailer.register_for_announce_list(@user.email,@user.firstName,@user.lastName).deliver   
+      flash[:success] = "You have subscribe successfully"
+    rescue => exception
+      flash[:error] = "Something went wrong ..."
+    end
+    redirect_to '/account'
+  end
+
+  def un_subscribe
+    @email = params[:email] 
+    begin
+      SubscribeMailer.unregister_for_announce_list(@email).deliver  
+      flash[:success] = "You have unsubscribe successfully"
+    rescue => exception
+      flash[:error] = "Something went wrong ..."
+    end
+    redirect_to '/account'
+  end
+
+
   private
 
   def user_params
@@ -235,4 +260,5 @@ class UsersController < ApplicationController
 
     user_roles
   end
+
 end
