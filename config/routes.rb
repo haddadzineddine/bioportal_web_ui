@@ -15,7 +15,7 @@ Rails.application.routes.draw do
   resources :reviews
 
   get '/users/subscribe/:username', to: 'users#subscribe'
-  get '/users/un-subscribe/:email', to: 'users#un_subscribe'
+  get '/users/un_subscribe/:email', to: 'users#un_subscribe'
 
   get '/mappings/loader' , to: 'mappings#loader'
   post '/mappings/loader', to: 'mappings#loader_process'
